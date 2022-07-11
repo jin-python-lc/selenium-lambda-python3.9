@@ -6,7 +6,7 @@
 ## Environment Image
 docker:dind
 
-## Environment Variable of Codebuild Buildproject
+## Environment Variable
 HTTPS_PROXY：proxy  
 HTTP_PROXY：proxy  
 NO_PROXY：localhost, 169.254.169.254, 169.254.170.2, endpoints  
