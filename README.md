@@ -1,15 +1,12 @@
-# selenium-lambda-python3.9
-
-## Diagram
+# Diagram
 ![image](https://user-images.githubusercontent.com/85344890/178254825-a9d970d0-083c-4123-bb8e-e3641bc3c6a9.png)
 
+# Codebuild Setup
 
-## Codebuild Setup
-
-### Environment Image
+## Environment Image
 docker:dind
 
-### Environment Variable of Codebuild Buildproject
+## Environment Variable of Codebuild Buildproject
 HTTPS_PROXY：proxy
 HTTP_PROXY：proxy
 NO_PROXY：localhost, 169.254.169.254, 169.254.170.2, endpoints
