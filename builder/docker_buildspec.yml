@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  install:
+    on-failure: ABORT
+    commands:
+       - apk add --update py-pip
+       - apk add python3
+       - apk add bash
+       - python3 -m pip install awscli
+       - export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text --region "${AWS_DEFAULT_REGION}" --endpoint-url https://sts.${AWS_DEFAULT_REGION}.amazonaws.com)
+       - export REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${REPOSITORY_NAME}
+       - aws ecr get-login-password --region "${AWS_DEFAULT_REGION}" --endpoint https://api.ecr.${AWS_DEFAULT_REGION}.amazonaws.com | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+
+  pre_build:
+    on-failure: ABORT
+    commands:
+       - source builder/docker_conf.sh
+       - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
+       - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+       - |
+         docker build -t $REPOSITORY_URI . \
+         --build-arg HTTPS_PROXY=$HTTPS_PROXY \
+         --build-arg HTTP_PROXY=$HTTP_PROXY \
+         --build-arg NO_PROXY=$NO_PROXY
+       
+  build:
+    on-failure: ABORT
+    commands:
+       - docker tag ${REPOSITORY_URI}:latest ${REPOSITORY_URI}:latest
+       - docker push ${REPOSITORY_URI}:latest
+
+  post_build:
+    on-failure: ABORT
+    commands:
+       - aws lambda update-function-code --function-name ${LAMBDA_FUNCTION_NAME} --image-uri ${REPOSITORY_URI}:latest --publish --region "${AWS_DEFAULT_REGION}" --endpoint https://lambda.${AWS_DEFAULT_REGION}.amazonaws.com
