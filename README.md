@@ -1,6 +1,8 @@
 # selenium-lambda-python3.9
 
 ## Diagram
+![image](https://user-images.githubusercontent.com/85344890/178254825-a9d970d0-083c-4123-bb8e-e3641bc3c6a9.png)
+
 
 ## Codebuild Setup
 
